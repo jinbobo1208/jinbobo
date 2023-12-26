@@ -1,1 +1,31 @@
+!pip install twstock
 
+import twstock as t
+
+import pandas as p
+
+import plotly.express as e
+
+import requests
+
+from io import StringIO
+
+import pandas as pd
+
+import numpy as np
+
+#查詢日期
+
+datestr = '20220819'
+
+r = requests.post('http://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date=' + datestr + '&type=ALL')
+
+df = pd.read_csv(StringIO("\n".join([i.translate({ord(c): None for c in ' '})
+
+  for i in r.text.split('\n')
+
+  if len(i.split('",')) == 17 and i[0] != '='])), header=0 , thousands=",")
+
+#條件篩選，5<本益比<15 且 收盤價<300 且 (成交股數/1000）>10000張
+
+df.loc[(pd.to_numeric(df['本益比'], errors='coerce') < 15) & (pd.to_numeric(df['本益比'], errors='coerce') > 5) & (pd.to_numeric(df['開盤價'], errors='coerce') < 30) & (pd.to_numeric(df['成交股數'], errors='coerce')/1000 > 10000)]
